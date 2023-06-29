@@ -27,19 +27,21 @@ extension AudioPlayer {
         return queue?.hasPreviousItem ?? false
     }
 
- // 初始化播放器数据
-    public func initData(items: [AudioItem], mode: AudioPlayerMode) {
-        queue = AudioItemQueue(items: items, mode: mode)
-        queue?.delegate = self
-    }
-
     /// Plays an item.
     ///
     /// - Parameter item: The item to play.
     public func play(item: AudioItem) {
         play(items: [item])
     }
-
+    
+    public func play(index: Int) {
+        guard index < (queue?.items.count ?? 0) else {
+            return
+        }
+        let toPlayItem =  queue?.items[index]
+        currentItem = toPlayItem
+    }
+    
     /// Creates a queue according to the current mode and plays it.
     ///
     /// - Parameters:
@@ -52,19 +54,23 @@ extension AudioPlayer {
             if let realIndex = queue?.queue.firstIndex(of: items[index]) {
                 queue?.nextPosition = realIndex
             }
-            currentItem = queue?.nextItem()
+            currentItem = queue?.nextItem() // 设置item时开始播放
         } else {
             stop()
             queue = nil
         }
     }
-
+    
     /// Adds an item at the end of the queue. If queue is empty and player isn't playing, the behaviour will be similar
     /// to `play(item:)`.
     ///
     /// - Parameter item: The item to add.
     public func add(item: AudioItem) {
         add(items: [item])
+    }
+    
+    public func add(item: AudioItem, immediatelyPlay:Bool) {
+        add(items: [item], immediatelyPlay: immediatelyPlay)
     }
 
     /// Adds items at the end of the queue. If the queue is empty and player isn't playing, the behaviour will be
@@ -76,6 +82,20 @@ extension AudioPlayer {
             queue.add(items: items)
         } else {
             play(items: items)
+        }
+    }
+    
+    public func add(items:[AudioItem], immediatelyPlay:Bool) {
+        if let queue = queue {
+            queue.add(items: items)
+        } else {
+            if immediatelyPlay {
+                play(items: items)
+            }
+            if  queue == nil {
+                self.queue = AudioItemQueue(items: items, mode: mode)
+                self.queue?.delegate = self
+            }
         }
     }
 
