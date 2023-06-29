@@ -27,6 +27,12 @@ extension AudioPlayer {
         return queue?.hasPreviousItem ?? false
     }
 
+ // 初始化播放器数据
+    public func initData(items: [AudioItem], mode: AudioPlayerMode) {
+        queue = AudioItemQueue(items: items, mode: mode)
+        queue?.delegate = self
+    }
+
     /// Plays an item.
     ///
     /// - Parameter item: The item to play.
