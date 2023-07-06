@@ -50,7 +50,10 @@ class AudioItemQueue {
 
     /// The current position in the queue.
     var nextPosition = 0
-
+    
+    // 当前取出
+    var currentPosition = 0
+    
     /// The player mode. It will affect the queue.
     var mode: AudioPlayerMode {
         didSet {
@@ -95,13 +98,17 @@ class AudioItemQueue {
         if !oldMode.contains(.repeatAll) && mode.contains(.repeatAll) {
             nextPosition = nextPosition % queue.count
         }
-
+        
+       
         if oldMode.contains(.repeat) && !mode.contains(.repeat) && historic.last == queue[nextPosition] {
+            // 如果上次是单曲循环
             nextPosition += 1
-        } else if !oldMode.contains(.repeat) && mode.contains(.repeat) && nextPosition == queue.count {
+        }
+        else if !oldMode.contains(.repeat) && mode.contains(.repeat) {
+            // 如果上次不是单曲循环
             nextPosition -= 1
         }
-
+        
         if oldMode.contains(.shuffle) && !mode.contains(.shuffle) {
             queue = items
             if let last = historic.last, let index = queue.firstIndex(of: last) {
